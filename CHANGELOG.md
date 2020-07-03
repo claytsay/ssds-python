@@ -7,6 +7,11 @@ guidelines to the extent allowed by [PEP 440](https://www.python.org/dev/peps/pe
 
 ### 0.1.x
 
+#### 0.1.1
+
+- Fixed a bug involving `ssds.abc` not being able to be imported
+- Updated `README.md` with PyPI instructions
+
 #### 0.1.0
 
 - Initial release

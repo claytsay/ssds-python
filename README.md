@@ -9,6 +9,16 @@ efficiency in mind.
 
 ## Installation
 
+### From PyPI
+
+Simply run the following command to install the package:
+
+```bash
+pip3 install ssds
+```
+
+### From Source
+
 After cloning, this package can be built and installed from source using the
 following command:
 
