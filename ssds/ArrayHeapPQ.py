@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""Contains a heap-based priority queue implementation.
-
-Uses an array to store the contents of the heap. Should have O(log(n))
-adds, removes, and updates.
-"""
-
 from enum import Enum
 from ssds.abc.PriorityQueue import PriorityQueue
 
@@ -16,12 +10,35 @@ class _Relation(Enum):
 
 
 class ArrayHeapPQ(PriorityQueue):
+    """Array-Heap Priority Queue.
+
+    Uses an array to store the contents of the heap. Should have
+    :math:`\\mathcal{O}(\\log(n))` adds, removes, and updates.
+
+    Parameters
+    ----------
+    is_max : bool, default=False
+        Selects whether the priority queue should dequeue the item with
+        the maximum priority (instead of the minimum priority).
+
+    Examples
+    --------
+    >>> from ssds import ArrayHeapPQ
+    >>> pq = ArrayHeapPQ()
+    >>> pq.add('a', 1)
+    >>> pq.add('b', 2)
+    >>> pq.change_priority('b', 0)
+    >>> pq.remove()
+    'b'
+    """
 
     # = = = = = = = = = = = = =
     # CONSTRUCTOR
     # = = = = = = = = = = = = =
 
     def __init__(self, is_max=False):
+        """Initialize self. See help(type(self)) for accurate signature."""
+
         super().__init__(is_max)
         self._nodes = [None]
         self._locations = {}
@@ -32,6 +49,24 @@ class ArrayHeapPQ(PriorityQueue):
     # = = = = = = = = = = = = =
 
     def add(self, item, priority: float) -> None:
+        """Adds an item to the priority queue.
+
+        Parameters
+        ----------
+        item
+            An item to be inserted into the queue. Does not need to be
+            hashable.
+
+        priority : float
+            The extrinsic priority of the object.
+            
+        Returns
+        -------
+        None
+            Nothing.
+        """
+        # TODO: Assess whether an infinitely positive/negative priority
+        #   would cause the code to malfunction
         if self.contains(item):
             # TODO: Maybe change this to simply update the priority?
             raise ValueError('item already present')
@@ -42,13 +77,55 @@ class ArrayHeapPQ(PriorityQueue):
         self._swim(len(self._nodes) - 1)
 
     def contains(self, item) -> bool:
+        """Returns whether the item is in the priority queue or not.
+
+        Parameters
+        ----------
+        item
+            An item to test the membership of in the priority queue.
+            
+        Returns
+        -------
+        bool
+            Returns True if `item` is in the priority queue;
+            False otherwise.
+        """
         return item in self._locations.keys()
 
     def get(self):
+        """Returns the first item in the priority queue.
+
+        Which (i.e. minimum or maximum) depends on if the priority queue was
+        initialized as a minimum or maximum priority queue. Does not remove
+        the minimum/maximum item from the queue.
+
+        Parameters
+        ----------
+        N/A
+
+        Returns
+        -------
+        object
+            The foremost item in the priority queue.
+        """
         self._validateSize()
         return self._nodes[1][0]
 
     def remove(self):
+        """Removes and returns the first item in the priority queue.
+
+        Which (i.e. minimum or maximum) depends on if the priority queue was
+        initialized as a minimum or maximum priority queue.
+
+        Parameters
+        ----------
+        N/A
+
+        Returns
+        -------
+        object
+            The foremost item in the priority queue.
+        """
         self._validateSize()
         smallest = None
         if self.size() == 1:
@@ -62,9 +139,35 @@ class ArrayHeapPQ(PriorityQueue):
         return smallest[0]
 
     def size(self) -> int:
+        """Returns the number of items in the priority queue.
+
+        Parameters
+        ----------
+        N/A
+
+        Returns
+        -------
+        int
+            The number of items in the priority queue.
+        """
         return len(self._locations)
 
-    def changePriority(self, item, priority: float) -> None:
+    def change_priority(self, item, priority: float) -> None:
+        """Changes the priority of the given item.
+
+        Parameters
+        ----------
+        item : any
+            The item in the priority queue to modify the priority of.
+
+        priority : double
+            The new priority to set the item to.
+
+        Returns
+        -------
+        None
+            Nothing.
+        """
         index = self._locations.get(item, None)
         if index is None:
             raise ValueError('item %s does not exist' % str(item))
@@ -81,46 +184,57 @@ class ArrayHeapPQ(PriorityQueue):
     # Parent/Child Utility Methods
     # - - - - - - - - - - - - -
 
-    def _hasRelation(self, index: int, relation: _Relation) -> bool:
+    def _has_relation(self, index: int, relation: _Relation) -> bool:
         """Checks to see whether a node has a certain relation.
 
         Determines whether the node at the given index has a given relation
         or not. If the provided Relation is invalid, will return `False` by
         default.
 
-        Args:
-            index (:obj:`int`): The index whose relation is to be queried.
-            relation (:obj:`Relation`): The relation to be queried about.
+        Parameters
+        ----------
+        index : int
+            The index whose relation is to be queried.
 
-        Returns:
-            bool: `True` if the relation node exists, `False` otherwise.
+        relation : ssds.ArrayHeapPQ._Relation
+            The relation to be queried about.
+
+        Returns
+        -------
+        bool
+            True if the relation node exists, False otherwise.
         """
         if relation is _Relation.PARENT:
-            return self._getRelationIndex(index, relation) != 0
+            return self._get_relation_index(index, relation) != 0
         elif relation is _Relation.CHILD_LEFT:
-            return self._isValidIndex(self._getRelationIndex(index, relation))
+            return self._is_valid_index(self._get_relation_index(index, relation))
         elif relation is _Relation.CHILD_RIGHT:
-            return self._isValidIndex(self._getRelationIndex(index, relation))
+            return self._is_valid_index(self._get_relation_index(index, relation))
         else:
             return False
 
-    def _getRelationIndex(self, index: int, relation: _Relation) -> int:
+    def _get_relation_index(self, index: int, relation: _Relation) -> int:
         """Gets the index of the specified relation.
 
         If the given Relation is invalid, returns 0.
 
-        Note:
-            Might return an out-of-bounds index. 
+        Notes
+        -----
+        Might return an out-of-bounds index.
 
-        Args:
-            index (:obj:`int`): The index whose relation's index is to be
-                queried.
-            relation (:obj:`Relation`): The relation to be queried about.
+        Parameters
+        ----------
+        index : int
+            The index whose relation's index is to be queried.
 
-        Returns:
-            int: The index of the specified relation of the given index.
+        relation : ssds.ArrayHeapPQ._Relation
+            The relation to be queried about.
+
+        Returns
+        -------
+        int
+            The index of the specified relation of the given index.
         """
-
         if relation is _Relation.PARENT:
             return index // 2
         elif relation is _Relation.CHILD_LEFT:
@@ -130,45 +244,55 @@ class ArrayHeapPQ(PriorityQueue):
         else:
             return 0
 
-    def _getRelationPriority(self, index: int, relation: _Relation) -> float:
+    def _get_relation_priority(self, index: int, relation: _Relation) -> float:
         """Gets the priority value of the specified relation.
 
-        Note:
-            If the relation is invalid (e.g. does not exist), will return 
-            positive infinity for the priority.
+        Notes
+        -----
+        If the relation is invalid (e.g. does not exist), will return
+        positive infinity for the priority.
 
-        Args:
-            index (:obj:`int`): The index whose relation's priority is to
-                be queried.
-            relation (:obj:`Relation`): The relation to be queried about.
+        Parameters
+        ----------
+        index : int
+            The index whose relation's priority is to be queried.
 
-        Returns:
-            float: The priority value of the specified relation to the
-            given index.
+        relation : ssds.ArrayHeapPQ._Relation
+            The relation to be queried about.
+
+        Returns
+        -------
+        float
+            The priority value of the specified relation to the given index.
         """
-        if not self._hasRelation(index, relation):
+        if not self._has_relation(index, relation):
             return float('inf')
         else:
-            return self._nodes[self._getRelationIndex(index, relation)][1]
+            return self._nodes[self._get_relation_index(index, relation)][1]
 
-    def _shouldSwap(self, index: int, relation: _Relation) -> bool:
+    def _should_swap(self, index: int, relation: _Relation) -> bool:
         """Determines if the node should be swapped with its relation.
 
         The method will return 'true' if the relation exists and comparison
         of the priorities shows that the two should be swapped.
 
-        Args:
-            index (:obj:`int`): The index whose relation's "swappiness" is
-                to be queried.
-            relation (:obj:`Relation`): The relation to be queried about.
+        Parameters
+        ----------
+        index : int
+            The index whose relation's "swappiness" is to be queried.
 
-        Returns:
-            bool: `True` if the node should be swapped with its relation;
-            `False` otherwise.
+        relation : ssds.ArrayHeapPQ._Relation
+            The relation to be queried about.
+
+        Returns
+        -------
+        bool
+            True if the node should be swapped with its relation;
+            False otherwise.
         """
         nodePriority = self._nodes[index][1]
-        relationPriority = self._getRelationPriority(index, relation)
-        if self._hasRelation(index, relation):
+        relationPriority = self._get_relation_priority(index, relation)
+        if self._has_relation(index, relation):
             if relation is _Relation.PARENT:
                 return nodePriority < relationPriority
             else:
@@ -185,9 +309,13 @@ class ArrayHeapPQ(PriorityQueue):
 
         Also updates the locations dictionary with the new indices.
 
-        Args:
-            i (:obj:`int`): The index of one of the items to swap.
-            j (:obj:`int`): The index of the other item to swap.
+        Parameters
+        ----------
+        i : int
+            The index of one of the items to swap.
+
+        j : int
+            The index of the other item to swap.
         """
 
         self._nodes[i], self._nodes[j] = self._nodes[j], self._nodes[i]
@@ -201,27 +329,29 @@ class ArrayHeapPQ(PriorityQueue):
     def _swim(self, index: int) -> None:
         """Attempts to swim a node to its correct position.
 
-        Args:
-            index (:obj:`int`): The index of the node to swim.
+        Parameters
+        ----------
+        index : int
+            The index of the node to swim.
         """
-        if self._shouldSwap(index, _Relation.PARENT):
-            swapIndex = self._getRelationIndex(index, _Relation.PARENT)
+        if self._should_swap(index, _Relation.PARENT):
+            swapIndex = self._get_relation_index(index, _Relation.PARENT)
             self._swap(index, swapIndex)
             self._swim(swapIndex)
-        elif self._shouldSwap(index,
-                              _Relation.CHILD_LEFT) or self._shouldSwap(
+        elif self._should_swap(index,
+                               _Relation.CHILD_LEFT) or self._should_swap(
             index, _Relation.CHILD_RIGHT):
-            leftPriority = self._getRelationPriority(index,
-                                                     _Relation.CHILD_LEFT)
-            rightPriority = self._getRelationPriority(index,
-                                                      _Relation.CHILD_RIGHT)
+            leftPriority = self._get_relation_priority(index,
+                                                       _Relation.CHILD_LEFT)
+            rightPriority = self._get_relation_priority(index,
+                                                        _Relation.CHILD_RIGHT)
             if rightPriority < leftPriority:
-                swapIndex = self._getRelationIndex(index,
-                                                   _Relation.CHILD_RIGHT)
+                swapIndex = self._get_relation_index(index,
+                                                     _Relation.CHILD_RIGHT)
                 self._swap(index, swapIndex)
                 self._swim(swapIndex)
             else:
-                swapIndex = self._getRelationIndex(index, _Relation.CHILD_LEFT)
+                swapIndex = self._get_relation_index(index, _Relation.CHILD_LEFT)
                 self._swap(index, swapIndex)
                 self._swim(swapIndex)
 
@@ -229,25 +359,30 @@ class ArrayHeapPQ(PriorityQueue):
     # Miscellaneous Utility Methods
     # - - - - - - - - - - - - -
 
-    def _isValidIndex(self, index: int) -> bool:
+    def _is_valid_index(self, index: int) -> bool:
         """Checks whether an index is acceptable or not.
 
         Checks to verify that (a) the index is within the bounds of the 
         list, and (b) the reference at the index is not null.
 
-        Args:
-            index (:obj:`int`): The index to check acceptability of.
+        Parameters
+        ----------
+        index : int
+            The index to check acceptability of.
 
-        Returns:
-            bool: `True` if the index is acceptable; `False` otherwise.
+        Returns
+        -------
+        bool
+            True if `index` is acceptable; False otherwise.
         """
         return 0 <= index < len(self._nodes) and self._nodes[index] is not None
 
     def _validateSize(self) -> None:
         """Checks to see if the size of the queue is greater than zero.
 
-        Raises:
-            RuntimeError: If the size of the queue <= 0.
+        Notes
+        -----
+        Raises a RuntimeError if the size of the queue <= 0.
         """
         if self.size() == 0:
             # TODO: Change this error

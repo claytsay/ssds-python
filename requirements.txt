@@ -1,0 +1,2 @@
+####### ssds-python requirements #######
+sphinx

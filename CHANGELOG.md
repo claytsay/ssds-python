@@ -7,6 +7,15 @@ guidelines to the extent allowed by [PEP 440](https://www.python.org/dev/peps/pe
 
 ### 0.1.x
 
+#### 0.1.2
+
+- Created documentation files for the project
+  - Utilizes [Sphinx](https://www.sphinx-doc.org/en/master/)
+  - To be deployed on GitHub pages
+- Updated docstings to follow the NumPy docstring guide
+  ([link](https://numpydoc.readthedocs.io/en/latest/format.html))
+- Added a `requirements.txt`
+
 #### 0.1.1
 
 - Fixed a bug involving `ssds.abc` not being able to be imported
