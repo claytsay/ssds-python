@@ -12,6 +12,7 @@ from random import choice, random, randrange
 from time import perf_counter
 
 from ssds import ArrayHeapPQ
+from ssds.abc import PriorityQueue
 from ssds.reference import ReferencePQ
 
 _MAX_VAL = 1000
@@ -96,11 +97,11 @@ class TestArrayHeapPQ(unittest.TestCase):
                     self.assertEqual(npq.remove(), ahpq.remove())
             elif j == 4:  # size
                 self.assertEqual(npq.size(), ahpq.size())
-            elif j == 5:  # changePriority
+            elif j == 5:  # change_priority
                 priority = random() * _MAX_PRIORITY
                 val = choice(val.keys())
-                npq.changePriority(val, priority)
-                ahpq.changePriority(val, priority)
+                npq.change_priority(val, priority)
+                ahpq.change_priority(val, priority)
             else:
                 continue
 
@@ -121,18 +122,44 @@ class TestArrayHeapPQ(unittest.TestCase):
         print('', hline, header, hline, sep='\n')
         for num_ops in [10 * (2 ** x) for x in range(floor(log2(maxOps // 10)))]:
             num_ops_str = ''
-            self._time_part1(num_ops, numTrials, times)
-            self._time_part2(num_ops, numTrials, times)
+            self._time_part1(num_ops, numTrials, times, ArrayHeapPQ)
+            self._time_part2(num_ops, numTrials, times, ArrayHeapPQ)
             num_ops_str += ' %8d ' % num_ops
             for m in _Method:
                 num_ops_str += '| %8f ' % times[m]
+            print(num_ops_str)
+
+    def test_time_ratio(self):
+        """Displays the speedup the efficient solution provides."""
+
+        # Test parameters
+        maxOps = 5000
+        numTrials = 6
+
+        # Other variables
+        header = ' numOps   | add      | contains | size     | getSmall | removeSm | changePr '
+        hline = '----------+----------+----------+----------+----------+----------+----------'
+        times_ref = {_Method.GET_SMALLEST: 0.0, _Method.REMOVE_SMALLEST: 0.0, _Method.CHANGE_PRIORITY: 0.0}
+        times = {_Method.GET_SMALLEST: 0.0, _Method.REMOVE_SMALLEST: 0.0, _Method.CHANGE_PRIORITY: 0.0}
+
+        # Do the timing and print as well
+        print('', hline, header, hline, sep='\n')
+        for num_ops in [10 * (2 ** x) for x in range(floor(log2(maxOps // 10)))]:
+            num_ops_str = ''
+            self._time_part1(num_ops, numTrials, times_ref, ReferencePQ)
+            self._time_part2(num_ops, numTrials, times_ref, ReferencePQ)
+            self._time_part1(num_ops, numTrials, times, ArrayHeapPQ)
+            self._time_part2(num_ops, numTrials, times, ArrayHeapPQ)
+            num_ops_str += ' %8d ' % num_ops
+            for m in _Method:
+                num_ops_str += '| %8f ' % (times_ref[m] / times[m])
             print(num_ops_str)
 
     # = = = = = = = = = = = = =
     # PRIVATE UTILITY METHODS
     # = = = = = = = = = = = = =
 
-    def _time_part1(self, numOps: int, numTrials: int, times: dict) -> None:
+    def _time_part1(self, numOps: int, numTrials: int, times: dict, struct: PriorityQueue) -> None:
         """Tests the speed of the `add`, `contains`, and `size` methods.
 
         Args:
@@ -140,6 +167,7 @@ class TestArrayHeapPQ(unittest.TestCase):
             numTrials (:obj:`int`): The number of trials to perform.
             times (:obj:`dict`): The data structure which to update with the average
                 time across the trials.
+            struct: The class of data structure to be used.
         """
 
         ahpq = None
@@ -148,7 +176,7 @@ class TestArrayHeapPQ(unittest.TestCase):
         endTime = None
 
         for trial in range(numTrials):
-            ahpq = ArrayHeapPQ()
+            ahpq = struct()
 
             # add
             startTime = perf_counter()
@@ -179,8 +207,8 @@ class TestArrayHeapPQ(unittest.TestCase):
         times[_Method.CONTAINS] = sum(trialTimes[1]) / numTrials
         times[_Method.SIZE] = sum(trialTimes[2]) / numTrials
 
-    def _time_part2(self, numOps: int, numTrials: int, times: dict) -> None:
-        """Tests the speed of `get`, `remove`, and `changePriority`.
+    def _time_part2(self, numOps: int, numTrials: int, times: dict, struct: PriorityQueue) -> None:
+        """Tests the speed of `get`, `remove`, and `change_priority`.
 
         Args:
             numOps (:obj:`int`): The number of operations to perform.
@@ -196,7 +224,7 @@ class TestArrayHeapPQ(unittest.TestCase):
 
         for trial in range(numTrials):
             # Set up the priority queue
-            ahpq = ArrayHeapPQ()
+            ahpq = struct()
             for _ in range(numOps):
                 self.add_to_pq(ahpq, values, numOps * 10)
 
@@ -222,12 +250,12 @@ class TestArrayHeapPQ(unittest.TestCase):
                 self.add_to_pq(ahpq, values, numOps * 10)
             trialTimes[1][trial] = sum(removeTimes) / numOps
 
-            # changePriority
+            # change_priority
             cpTimes = [0] * numOps
             for i in range(numOps):
                 value = choice(list(values))
                 startTime = perf_counter()
-                ahpq.changePriority(value, random() * _MAX_PRIORITY)
+                ahpq.change_priority(value, random() * _MAX_PRIORITY)
                 endTime = perf_counter()
                 cpTimes[i] = endTime - startTime
             trialTimes[2][trial] = sum(cpTimes) / numOps

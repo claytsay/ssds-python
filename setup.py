@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='ssds',
-    version='0.1.1',
+    version='0.1.3',
     author='Clay Tsay',
     author_email='',
     description='Some specialized data structures for Python.',

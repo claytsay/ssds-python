@@ -7,6 +7,12 @@ guidelines to the extent allowed by [PEP 440](https://www.python.org/dev/peps/pe
 
 ### 0.1.x
 
+#### 0.1.3
+
+- Fixed a critical bug regarding mismatched method names
+- Added a test that computes the speed ratio between `ArrayHeapPQ` and
+  `ReferencePQ`
+
 #### 0.1.2
 
 - Created documentation files for the project

@@ -44,12 +44,12 @@ class ReferencePQ(PriorityQueue):
         index = self._indexOf(self.get())
         return self._nodes.pop(index)[0]
 
-    def changePriority(self, item, priority: float) -> None:
+    def change_priority(self, item, priority: float) -> None:
         if not self.contains(item):
             raise ValueError('item not in queue')
         if self._max:
             priority *= -1
-        self._nodes[self._indexOf(item)] = (self._nodes[self._indexOf(item)], priority)
+        self._nodes[self._indexOf(item)] = (self._nodes[self._indexOf(item)][0], priority)
 
     def size(self) -> int:
         return len(self._nodes)

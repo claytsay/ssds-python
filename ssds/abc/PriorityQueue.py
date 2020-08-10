@@ -96,7 +96,7 @@ class PriorityQueue(ABC):
         pass
 
     @abstractmethod
-    def changePriority(self, item, priority: float) -> None:
+    def change_priority(self, item, priority: float) -> None:
         """Changes the priority of the given item.
         
         Args:
